@@ -27,13 +27,28 @@ spec:
             - name: RELEASE_NODE_IP
               valueFrom:
                 fieldRef:
-                  fieldPath: status.podIP
-            - name: RELEASE_COOKIE
-              valueFrom:
-                secretKeyRef:
-                  name: my-elixir-app-cluster
-                  key: ERLANG_COOKIE
+                  fieldPath: status.podIP           
           ports:
             - name: epmd
               containerPort: 4369
               protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-elixir-app-svc-headless
+  namespace: default
+  labels:
+    app.kubernetes.io/name: my-elixir-app
+    app.kubernetes.io/instance: myapp-svc-headless
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+    - port: 4369
+      targetPort: epmd
+      protocol: TCP
+      name: epmd
+  selector:
+    app.kubernetes.io/name: my-elixir-app
+    app.kubernetes.io/instance: myapp-node
